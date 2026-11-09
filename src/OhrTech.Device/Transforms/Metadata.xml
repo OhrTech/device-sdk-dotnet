@@ -1,0 +1,24 @@
+<metadata>
+  <!-- The binding of net.ohrtech:device-sdk is internal: the package's public API is the C# layer over it. -->
+
+  <!-- Not bound: the Agent's binder interfaces, the App Startup initializer, and the JCA classes (Kotlin only;
+       their operations are in OhrKeys). Their Java code stays in the AAR. -->
+  <remove-node path="/api/package[@name='net.ohrtech.device.aidl']" />
+  <remove-node path="/api/package[@name='net.ohrtech.device']/class[@name='OhrDeviceSdkInitializer']" />
+  <remove-node path="/api/package[@name='net.ohrtech.device.keys']/class[@name='OhrTechProvider' or starts-with(@name, 'OhrTechProvider.')
+      or @name='OhrKem' or starts-with(@name, 'OhrKem.') or @name='OhrHpke' or starts-with(@name, 'OhrHpke.')
+      or @name='OhrKeyGenParameterSpec' or @name='OhrPublicKey' or @name='OhrPrivateKey']" />
+
+  <!-- Kotlin's internal classes (public on the JVM). -->
+  <remove-node path="/api/package[@name='net.ohrtech.device']/class[@name='Agent' or @name='AreasKt' or @name='Change'
+      or @name='OhrExceptionKt' or @name='PublicIds' or @name='Subscription' or @name='Watcher']" />
+  <remove-node path="/api/package[@name='net.ohrtech.device.push']/class[@name='Cbor' or @name='CborException'
+      or @name='PushEnvelope' or @name='PushPlaintext' or @name='PushReceipt' or starts-with(@name, 'PushReceipt.') or @name='PushStore']" />
+
+  <!-- No C# events for the Java listeners: they would make public EventArgs types; the C# layer has its own. -->
+  <attr path="/api/package[@name='net.ohrtech.device']/interface[@name='OhrListener']/method" name="eventName"></attr>
+  <attr path="/api/package[@name='net.ohrtech.device']/interface[@name='OhrWifiView.Listener']/method" name="eventName"></attr>
+
+  <attr path="/api/package[starts-with(@name, 'net.ohrtech.device')]/class" name="visibility">internal</attr>
+  <attr path="/api/package[starts-with(@name, 'net.ohrtech.device')]/interface" name="visibility">internal</attr>
+</metadata>

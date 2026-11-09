@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/samples/">
+    <Project Path="samples/OhrTech.Device.Checks/OhrTech.Device.Checks.csproj" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/OhrTech.Device.Maui/OhrTech.Device.Maui.csproj" />
+    <Project Path="src/OhrTech.Device/OhrTech.Device.csproj" />
+  </Folder>
+</Solution>

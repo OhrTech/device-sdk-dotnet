@@ -1,0 +1,20 @@
+<Project>
+  <PropertyGroup>
+    <Authors>OhrTech</Authors>
+    <Copyright>Copyright (c) 2026 OhrTech</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://docs.ohrtech.net/device-sdk/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/OhrTech/device-sdk-dotnet</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>ohrtech;mdm;kiosk;device-management;android;maui</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- Bound Java members without docs; the generated binding's own warnings. -->
+    <NoWarn>$(NoWarn);CS1591;CS0108;CS8765</NoWarn>
+    <!-- Local builds: the Android SDK of this machine when not given. -->
+    <AndroidSdkDirectory Condition="'$(AndroidSdkDirectory)' == '' and Exists('/opt/android-sdk')">/opt/android-sdk</AndroidSdkDirectory>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IsPackable)' != 'false' and '$(OutputType)' != 'Exe'">
+    <None Include="$(MSBuildThisFileDirectory)README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+</Project>

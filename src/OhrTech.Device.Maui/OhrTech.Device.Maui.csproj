@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>33</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <Description>The OhrTech Device SDK in .NET MAUI: the Agent's Wi-Fi screen as a MAUI control, and UseOhrTechDevice() for the push handlers and dependency injection. Builds on OhrTech.Device.</Description>
+    <RootNamespace>OhrTech.Device.Maui</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.120" />
+    <ProjectReference Include="../OhrTech.Device/OhrTech.Device.csproj" />
+  </ItemGroup>
+</Project>

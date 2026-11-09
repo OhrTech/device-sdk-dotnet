@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>33</SupportedOSPlatformVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsAotCompatible>true</IsAotCompatible>
+    <IsTrimmable>true</IsTrimmable>
+    <Description>The OhrTech Device SDK for .NET for Android and MAUI: what an app on an OhrTech device can ask the OhrTech Agent for. The device, its updates, Wi-Fi with Android's Wi-Fi screen in your layout, network, kiosk mode, power, settings, managed configuration, attestation, client certificates (for HttpClient), USB devices, diagnostics, TEE keys and end-to-end push. Trim- and NativeAOT-safe.</Description>
+    <RootNamespace>OhrTech.Device</RootNamespace>
+  </PropertyGroup>
+
+  <!-- The Kotlin library this package wraps: from Maven Central, or a local build with -p:OhrDeviceSdkAar=<path>. -->
+  <ItemGroup Condition="'$(OhrDeviceSdkAar)' == ''">
+    <AndroidMavenLibrary Include="net.ohrtech:device-sdk" Version="0.3.0" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(OhrDeviceSdkAar)' != ''">
+    <AndroidLibrary Include="$(OhrDeviceSdkAar)" JavaArtifact="net.ohrtech:device-sdk:0.3.0" Manifest="$([System.IO.Path]::ChangeExtension('$(OhrDeviceSdkAar)', '.pom'))" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Xamarin.KotlinX.Coroutines.Android" Version="1.11.0.1" />
+    <PackageReference Include="Xamarin.Kotlin.StdLib" Version="2.4.0.1" />
+    <PackageReference Include="Xamarin.AndroidX.Annotation" Version="1.11.0" />
+    <PackageReference Include="Xamarin.AndroidX.Startup.StartupRuntime" Version="1.2.0.8" />
+  </ItemGroup>
+</Project>
