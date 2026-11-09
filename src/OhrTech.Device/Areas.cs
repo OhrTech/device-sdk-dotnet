@@ -321,7 +321,9 @@ public static class OhrKiosk
     /// Tells the Agent's kiosk watchdog that the app's main thread is alive: the library beats from Android's main
     /// thread (where .NET for Android and MAUI run their UI) a few times per <paramref name="timeout"/> (10 s by
     /// default, 2 s to 10 minutes). If the beats stop for longer, the Agent stops the app and starts it again. Only
-    /// while the app is pinned; call it again after <see cref="StartAsync"/>. One per app.
+    /// while the app is pinned; call it again after <see cref="StartAsync"/>. One per app. With Agent 1062+, the
+    /// fleet's response timeout for the app (portal or Management API), when set, replaces <paramref name="timeout"/>,
+    /// and hangs aren't counted while the screen is off (the app gets a full timeout again when it comes back on).
     /// </summary>
     public static void Heartbeat(TimeSpan? timeout = null) =>
         Native.Call(() => Bound.OhrKiosk.Heartbeat((long)(timeout ?? TimeSpan.FromSeconds(10)).TotalMilliseconds));
