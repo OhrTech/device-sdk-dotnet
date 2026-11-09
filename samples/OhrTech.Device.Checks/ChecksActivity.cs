@@ -51,6 +51,11 @@ public sealed class ChecksActivity : Activity
             Sample();
             return;
         }
+        if (check == "anr-touch")
+        {
+            AnrTouch();
+            return;
+        }
         status = new TextView(this) { Text = "running…" };
         status.SetPadding(48, 96, 48, 48);
         SetContentView(status);
@@ -90,6 +95,26 @@ public sealed class ChecksActivity : Activity
                 RunOnUiThread(() => Show($"Device SDK: {e.Message}"));
             }
         });
+    }
+
+    /// <summary>
+    /// For the per-app ANR time (apps.response_timeout): a touch blocks the main thread for --ei block seconds (30), so a
+    /// second touch waits in input until Android's ANR time for the app. No kiosk mode, so the Agent's watchdog stays out of it.
+    /// </summary>
+    private void AnrTouch()
+    {
+        var seconds = Intent?.GetIntExtra("block", 30) ?? 30;
+        var view = new TextView(this) { Text = $"Touch: the main thread then blocks {seconds} s" };
+        view.SetPadding(48, 96, 48, 48);
+        view.Touch += (_, e) =>
+        {
+            if (e.Event?.Action != Android.Views.MotionEventActions.Down) return;
+            Log.Info(Tag, $"CHECK BLOCKING {seconds} s");
+            Thread.Sleep(seconds * 1000);
+            Log.Info(Tag, "CHECK UNBLOCKED");
+        };
+        SetContentView(view);
+        Log.Info(Tag, "CHECK READY anr-touch");
     }
 
     private static async Task<string> Try(string label, Func<Task> action)
