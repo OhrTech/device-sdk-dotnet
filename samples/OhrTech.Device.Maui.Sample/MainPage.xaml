@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:ohr="clr-namespace:OhrTech.Device.Maui;assembly=OhrTech.Device.Maui"
+             x:Class="OhrTech.Device.Maui.Sample.MainPage">
+  <Grid RowDefinitions="Auto,Auto,*" Padding="16" RowSpacing="8">
+    <Label x:Name="Status" Text="…" />
+    <HorizontalStackLayout Grid.Row="1" Spacing="8">
+      <Button Text="Kiosk on" Clicked="OnKioskOn" />
+      <Button Text="Kiosk off" Clicked="OnKioskOff" />
+    </HorizontalStackLayout>
+    <ohr:OhrWifiView x:Name="Wifi" Grid.Row="2" Connected="OnWifiConnected" Error="OnWifiError" />
+  </Grid>
+</ContentPage>

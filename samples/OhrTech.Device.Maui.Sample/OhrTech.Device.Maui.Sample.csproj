@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- A MAUI app on OhrTech.Device.Maui: UseOhrTechDevice() with the push handlers, the Wi-Fi screen in XAML, an area injected
+       into the page. Started with the extra "check" set to maui or push, it runs that device check instead and logs
+       "CHECK PASS|FAIL name detail" (tag OhrSdkCheck), as the other checks apps do. Build it as another hub app with the
+       ApplicationId and ApplicationVersion properties. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0-android</TargetFramework>
+    <SupportedOSPlatformVersion>33</SupportedOSPlatformVersion>
+    <OutputType>Exe</OutputType>
+    <UseMaui>true</UseMaui>
+    <SingleProject>true</SingleProject>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>OhrTech.Device.Maui.Sample</RootNamespace>
+    <ApplicationId Condition="'$(ApplicationId)' == ''">net.ohrtech.device.maui.sample</ApplicationId>
+    <ApplicationVersion Condition="'$(ApplicationVersion)' == ''">1</ApplicationVersion>
+    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationTitle>OhrTech SDK (MAUI)</ApplicationTitle>
+    <AndroidPackageFormat>apk</AndroidPackageFormat>
+    <RuntimeIdentifier>android-arm64</RuntimeIdentifier>
+    <MauiXamlInflator>SourceGen</MauiXamlInflator>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Maui.Controls" Version="10.0.120" />
+    <ProjectReference Include="../../src/OhrTech.Device.Maui/OhrTech.Device.Maui.csproj" />
+  </ItemGroup>
+</Project>
