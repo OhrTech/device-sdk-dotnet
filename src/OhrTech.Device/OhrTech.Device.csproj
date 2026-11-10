@@ -12,10 +12,10 @@
 
   <!-- The Kotlin library this package wraps: from Maven Central, or a local build with -p:OhrDeviceSdkAar=<path>. -->
   <ItemGroup Condition="'$(OhrDeviceSdkAar)' == ''">
-    <AndroidMavenLibrary Include="net.ohrtech:device-sdk" Version="0.3.1" />
+    <AndroidMavenLibrary Include="net.ohrtech:device-sdk" Version="0.3.2" />
   </ItemGroup>
   <ItemGroup Condition="'$(OhrDeviceSdkAar)' != ''">
-    <AndroidLibrary Include="$(OhrDeviceSdkAar)" JavaArtifact="net.ohrtech:device-sdk:0.3.1" Manifest="$([System.IO.Path]::ChangeExtension('$(OhrDeviceSdkAar)', '.pom'))" />
+    <AndroidLibrary Include="$(OhrDeviceSdkAar)" JavaArtifact="net.ohrtech:device-sdk:0.3.2" Manifest="$([System.IO.Path]::ChangeExtension('$(OhrDeviceSdkAar)', '.pom'))" />
   </ItemGroup>
 
   <ItemGroup>

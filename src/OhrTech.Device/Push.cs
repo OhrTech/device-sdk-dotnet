@@ -12,6 +12,23 @@ public enum OhrPushSuite
     XWingMlDsa65,
 }
 
+public static class OhrPushSuiteNames
+{
+    extension(OhrPushSuite suite)
+    {
+        /// <summary>The suite's name on the wire and in the Management API: "x25519" or "xwing-mldsa65".</summary>
+        public string WireName => suite == OhrPushSuite.X25519 ? "x25519" : "xwing-mldsa65";
+    }
+
+    /// <summary>The suite named <paramref name="wireName"/> ("x25519" or "xwing-mldsa65"), or null.</summary>
+    public static OhrPushSuite? FromWireName(string wireName) => wireName switch
+    {
+        "x25519" => OhrPushSuite.X25519,
+        "xwing-mldsa65" => OhrPushSuite.XWingMlDsa65,
+        _ => null,
+    };
+}
+
 /// <summary>A sender's public keys, as your server's OhrTech SDK gives them: <paramref name="Ed25519"/> (32 bytes) and, for the xwing-mldsa65 suite, <paramref name="MlDsa65"/> (1,952 bytes).</summary>
 public sealed record OhrSenderKey(byte[] Ed25519, byte[]? MlDsa65 = null)
 {
@@ -29,7 +46,7 @@ public sealed record OhrPushToken(string Token, OhrPushSuite Suite, byte[] Publi
     public string PublicKeyBase64 => Convert.ToBase64String(PublicKey);
 
     internal static OhrPushToken Of(BoundPush.PushToken t) =>
-        new(t.Token, t.Suite.WireName == "x25519" ? OhrPushSuite.X25519 : OhrPushSuite.XWingMlDsa65, t.GetPublicKey());
+        new(t.Token, OhrPushSuiteNames.FromWireName(t.Suite.WireName) ?? OhrPushSuite.XWingMlDsa65, t.GetPublicKey());
 }
 
 /// <summary>A message your server sent, verified and opened. <paramref name="Id"/>: your server's id; <paramref name="Data"/> its bytes (at most 4,096); <paramref name="PushId"/> the hub's id ("pmsg_…").</summary>
@@ -97,32 +114,40 @@ internal sealed class OhrDevicePushService : BoundPush.OhrPushService
     public override void OnMessage(BoundPush.OhrPushMessage message)
     {
         var m = new OhrPushMessage(message.Id, message.GetData(), DateTimeOffset.FromUnixTimeMilliseconds(message.ExpiresAtMs), message.HighPriority, message.PushId);
-        Run("message", OhrPush.OnMessage is { } h ? () => h(m) : null);
+        // A message the handler didn't take: the library reports it to the hub as dropped, and the sender may send it again.
+        if (Run("message", OhrPush.OnMessage is { } h ? () => h(m) : null) is { } failed)
+            throw new BoundPush.OhrPushService.NotHandled(failed);
     }
 
     public override void OnTokenChanged(BoundPush.PushToken? token)
     {
         var t = token is null ? null : OhrPushToken.Of(token);
-        Run("token", OhrPush.OnTokenChanged is { } h ? () => h(t) : null);
+        if (OhrPush.OnTokenChanged is { } h) Run("token", () => h(t));
     }
 
-    public override void OnDropped(string pushId, string reason) =>
-        Run("dropped", OhrPush.OnDropped is { } h ? () => h(pushId, reason) : null);
+    public override void OnDropped(string pushId, string reason)
+    {
+        if (OhrPush.OnDropped is { } h) Run("dropped", () => h(pushId, reason));
+    }
 
-    private static void Run(string what, Func<Task>? handler)
+    /// <summary>Runs the handler and waits for it: null when it ran, else why not ("no_handler", "handler_timeout" or "handler").</summary>
+    private static string? Run(string what, Func<Task>? handler)
     {
         if (handler is null)
         {
             Log.Warn(LogTag, $"Push {what}: the app set no handler (OhrPush.SetHandlers when the process starts)");
-            return;
+            return "no_handler";
         }
         try
         {
-            if (!handler().Wait(HandlerTime)) Log.Warn(LogTag, $"Push {what}: the handler took longer than {HandlerTime.TotalSeconds} s");
+            if (handler().Wait(HandlerTime)) return null;
+            Log.Warn(LogTag, $"Push {what}: the handler took longer than {HandlerTime.TotalSeconds} s");
+            return "handler_timeout";
         }
         catch (Exception e)
         {
             Log.Error(LogTag, $"Push {what}: the handler threw: {e}");
+            return "handler";
         }
     }
 }

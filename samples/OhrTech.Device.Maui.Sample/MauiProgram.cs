@@ -19,6 +19,8 @@ public static class MauiProgram
 
     private static Task OnPushMessage(OhrPushMessage m)
     {
+        // The device checks' failing handler: the hub then shows the message as dropped (app_handler).
+        if (Encoding.UTF8.GetString(m.Data).Contains("\"fail\"")) throw new InvalidOperationException("the handler failed, as asked");
         Android.Util.Log.Info(Tag, $"PUSH RECEIVED {m.Id} ({m.PushId}): {Encoding.UTF8.GetString(m.Data)} main={MainThread.IsMainThread}");
         return Task.CompletedTask;
     }

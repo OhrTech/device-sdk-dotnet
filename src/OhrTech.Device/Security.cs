@@ -124,8 +124,25 @@ public static class OhrCertificates
 
     private static readonly ConcurrentDictionary<string, Factory> factories = new();
 
+    // The fleet's changes too (trusted CAs, bundles) clear the cache, from its first use; with an Agent before 1061, five minutes.
+    private static int watching;
+    private static Java.IO.ICloseable? watch;
+
+    private static void Watch()
+    {
+        if (Interlocked.Exchange(ref watching, 1) == 1) return;
+        try
+        {
+            watch = Native.Call(() => Bound.OhrCertificates.Listen(Native.Direct, new Native.Listener(_ => factories.Clear())));
+        }
+        catch (OhrException)
+        {
+        }
+    }
+
     internal static SSLSocketFactory SocketFactory(string? alias)
     {
+        Watch();
         var key = alias ?? "";
         if (factories.TryGetValue(key, out var f) && DateTime.UtcNow - f.MadeAt < TimeSpan.FromMinutes(5)) return f.SocketFactory;
         var made = Native.Call(() => Bound.OhrCertificates.SslContext(alias).SocketFactory!);
@@ -147,6 +164,31 @@ public enum OhrKeyAlgorithm
     XWing,
     /// <summary>HPKE DHKEM(X25519) only: <see cref="OhrKeys.HpkeOpenAsync"/>; there is no raw encapsulate or decapsulate.</summary>
     X25519,
+}
+
+public static class OhrKeyAlgorithmNames
+{
+    extension(OhrKeyAlgorithm algorithm)
+    {
+        /// <summary>The algorithm's standard name, as the Management API takes it: "ML-KEM-768", "ML-KEM-1024", "X-Wing" or "X25519".</summary>
+        public string StandardName => algorithm switch
+        {
+            OhrKeyAlgorithm.MlKem768 => "ML-KEM-768",
+            OhrKeyAlgorithm.MlKem1024 => "ML-KEM-1024",
+            OhrKeyAlgorithm.XWing => "X-Wing",
+            _ => "X25519",
+        };
+    }
+
+    /// <summary>The algorithm with the standard name <paramref name="standardName"/>, or null.</summary>
+    public static OhrKeyAlgorithm? FromStandardName(string standardName) => standardName switch
+    {
+        "ML-KEM-768" => OhrKeyAlgorithm.MlKem768,
+        "ML-KEM-1024" => OhrKeyAlgorithm.MlKem1024,
+        "X-Wing" => OhrKeyAlgorithm.XWing,
+        "X25519" => OhrKeyAlgorithm.X25519,
+        _ => null,
+    };
 }
 
 public sealed record OhrKeyInfo(string Alias, OhrKeyAlgorithm Algorithm, DateTimeOffset CreatedAt);
@@ -176,21 +218,9 @@ public static class OhrHpke
 /// </summary>
 public static class OhrKeys
 {
-    private static BoundKeys.OhrKeys.Algorithm Bound(OhrKeyAlgorithm a) => BoundKeys.OhrKeys.Algorithm.Named(a switch
-    {
-        OhrKeyAlgorithm.MlKem768 => "ML-KEM-768",
-        OhrKeyAlgorithm.MlKem1024 => "ML-KEM-1024",
-        OhrKeyAlgorithm.XWing => "X-Wing",
-        _ => "X25519",
-    });
+    private static BoundKeys.OhrKeys.Algorithm Bound(OhrKeyAlgorithm a) => BoundKeys.OhrKeys.Algorithm.Named(a.StandardName);
 
-    private static OhrKeyAlgorithm Of(BoundKeys.OhrKeys.Algorithm a) => a.StandardName switch
-    {
-        "ML-KEM-768" => OhrKeyAlgorithm.MlKem768,
-        "ML-KEM-1024" => OhrKeyAlgorithm.MlKem1024,
-        "X-Wing" => OhrKeyAlgorithm.XWing,
-        _ => OhrKeyAlgorithm.X25519,
-    };
+    private static OhrKeyAlgorithm Of(BoundKeys.OhrKeys.Algorithm a) => OhrKeyAlgorithmNames.FromStandardName(a.StandardName) ?? OhrKeyAlgorithm.X25519;
 
     /// <summary>Whether this device's OS has the OhrTech KEM app.</summary>
     public static Task<bool> IsAvailableAsync() => Native.Run(() => BoundKeys.OhrKeys.IsAvailable);
