@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.1 (unreleased)
+## 0.1.1 (2026-11-10)
 
 Builds on net.ohrtech:device-sdk 0.3.2.
 
